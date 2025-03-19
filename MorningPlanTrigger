@@ -1,0 +1,81 @@
+function onOpen(){
+  var Ui = SpreadsheetApp.getUi();
+  Ui.createMenu("MOULDING").addItem("Send Morning Plan on WhatsApp", "morningPlan").addToUi();
+
+  hiddenSheet();
+}
+
+function morningPlan() {
+  var SS = SpreadsheetApp.getActiveSpreadsheet();
+  var Ui = SpreadsheetApp.getUi();
+  var ActiveSheet = SS.getActiveSheet();
+  var MouldSheet = SS.getSheetByName("Moulding Production");
+  var MrngPlanSheet  = SS.getSheetByName("Morning Mould Plan");
+
+
+  if(ActiveSheet.getName()==="Morning Mould Plan"){
+    var DataRange = MrngPlanSheet.getRange(2, 1, MrngPlanSheet.getLastRow()-1, 7).getValues();
+
+    const DateObj = {};
+    DataRange.forEach(function (i) {
+      if (i[0] != "" && i[1] !="" && i[2] !="" && (i[6] !="" || i[6]!=0)) {
+        var date = new Date(i[0]); // Convert to date object
+        var formattedDate = Utilities.formatDate(date, "GMT+05:30", "dd-MM-yyyy"); // Format the date
+
+        if (!DateObj[formattedDate]) {
+          DateObj[formattedDate] = [];
+        }
+        DateObj[formattedDate].push(i);
+      }
+    });
+
+    // Now format the output
+    var output = "";  // Initialize empty string to store the result
+    
+    for (const [date, records] of Object.entries(DateObj)) {
+      output += date + "?\n";  // Add date to the output
+
+      records.forEach(function (record, index) {
+      output += (index + 1) + ". *" + record[2] + " (" + record[4] + ")* -" + record[3] + "; " + record[1] + "; Lot Qty=" + record[6] + "?\n";
+    });
+      output += "?\n";  // Add an extra newline between different dates
+    }
+
+    Logger.log(output);  // Log the final output
+
+    // Get the recipient's email address
+    if(output!=""){ 
+      var recipientEmail = "dmm@bajato.com";
+      
+      // Send the email with the table image attachment
+      GmailApp.sendEmail(recipientEmail, "MOULDING PLAN (BAJATO PARTS)", "", {
+        htmlBody : output
+      });
+    }
+
+    //...........Copy data in Assy Data Sheet
+    var CopyValue = MrngPlanSheet.getRange(2, 1, MrngPlanSheet.getLastRow()-1, 7).getValues();
+
+    CopyValue.forEach(function(s){
+    
+      if(s[0] != "" && s[1] !="" && s[2] !="" && (s[6] !="" || s[6]!=0)){
+        var Lr = MouldSheet.getRange(MouldSheet.getMaxRows(), 1).getNextDataCell(SpreadsheetApp.Direction.UP).getRow();
+        var Arr = [s[0], s[1], "", s[2], s[3], "", "", s[4], "", "", "", s[5], "", "", "", "", "", "", s[6]];
+        Logger.log(Arr);
+        MouldSheet.getRange(Lr+1, 1, 1, Arr.length).setValues([Arr]);
+
+      }
+      
+    })
+    MrngPlanSheet.getRange(2, 1, MrngPlanSheet.getLastRow()-1, MrngPlanSheet.getLastColumn()).clearContent();
+    
+  } else{
+    Ui.alert("Error !", "Wrong Sheet", Ui.ButtonSet.OK);
+
+  }
+
+}
+
+
+
+
