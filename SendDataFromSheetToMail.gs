@@ -30,9 +30,9 @@ function sendMail() {
 
   Logger.log(output); 
   if(output!=""){ 
-    var recipientEmail = "dmm@bajato.com";
+    var recipientEmail = "d";
     
-    GmailApp.sendEmail(recipientEmail, "MOULDING PRODUCTION UPDATE (BAJATO PARTS)", "", {
+    GmailApp.sendEmail(recipientEmail, "MOULDING PRODUCTION UPDATE", "", {
       htmlBody : output
     });
   }
