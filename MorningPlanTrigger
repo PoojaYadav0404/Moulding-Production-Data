@@ -45,10 +45,10 @@ function morningPlan() {
 
     // Get the recipient's email address
     if(output!=""){ 
-      var recipientEmail = "dmm@bajato.com";
+      var recipientEmail = "";
       
       // Send the email with the table image attachment
-      GmailApp.sendEmail(recipientEmail, "MOULDING PLAN (BAJATO PARTS)", "", {
+      GmailApp.sendEmail(recipientEmail, "MOULDING PLAN (B)", "", {
         htmlBody : output
       });
     }
